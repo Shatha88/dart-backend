@@ -14,9 +14,9 @@ class UserRoute {
   Handler get handler {
     final router = Router()
       ..post('/add_contact', addContactResponse) // Add contact
-      ..get("/view_contact/<id>", displayContactResponse) // display contact
-      ..delete('/delete_mycontact/<id>', deleteContactResponse) //delete contact
-      ..get("/display_user/<id>", displayUserContact) // display user => contact
+      ..get("/view_contact", displayContactResponse) // display contact
+      ..delete('/delete_mycontact', deleteContactResponse) //delete contact
+      ..get("/display_user", displayUserContact) // display user => contact
       ..get('/view_allcontact', displayAllContact);
 
     final pipline =

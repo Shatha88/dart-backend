@@ -1,21 +1,43 @@
 // ignore_for_file: file_names
 
+import 'dart:convert';
+
 import 'package:shelf/shelf.dart';
 import 'package:supabase/supabase.dart';
 
-import '../../ResponseMsg/CustomResponse.dart';
+import '../../Models/UserModel.dart';
+import '../../RespnseMsg/CustomResponse.dart';
+import '../../Services/Supabase/supabaseEnv.dart';
 
-createUserResponse(Request _) async {
+createResponse(Request req) async {
   try {
-    return CustomResponse().successResponse(
-      msg: "",
-      statusCode: 201,
-      data: [],
+    final body = json.decode(await req.readAsString());
+    final auth = SupabaseEnv().supabase.auth;
+
+    UserResponse userInfo = await auth.admin.createUser(
+      AdminUserAttributes(email: body["email"], password: body["password"]),
     );
-  } on AuthException catch (error) {
-    return CustomResponse()
-        .errorResponse(msg: error.message, statusCode: error.statusCode);
-  } on Exception catch (error) {
-    return CustomResponse().errorResponse(msg: '$error', statusCode: '400');
+
+    UserModel userObject = UserModel(
+        email: userInfo.user!.email!,
+        idAuth: userInfo.user!.id,
+        name: body["name"],
+        username: body["username"],
+        bio: body["bio"],);
+
+     await auth.signInWithOtp(email: body['email']);
+     await SupabaseEnv().supabase.from("users1").insert(userObject.toMap());
+
+     return CustomResponse().successResponse(
+      msg: "Account created successfully!",
+      data: {"email": body['email'], "username": body['username']},
+    );
+
+  } catch (error) {
+    print(error);
+
+    return CustomResponse().errorResponse(
+      msg: "sorry, please check your information",
+    );
   }
 }

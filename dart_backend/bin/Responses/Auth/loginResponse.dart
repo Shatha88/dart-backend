@@ -1,21 +1,32 @@
-// ignore_for_file: file_names
+import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
-import 'package:supabase/supabase.dart';
 
-import '../../ResponseMsg/CustomResponse.dart';
+import '../../RespnseMsg/CustomResponse.dart';
+import '../../Services/Supabase/supabaseEnv.dart';
 
-loginResponse(Request _) async {
-  try {
-    return CustomResponse().successResponse(
-      msg: "",
-      statusCode: 201,
-      data: [],
+loginResponse(Request req) async {
+ try {
+    final body = json.decode(await req.readAsString());
+    if (body["email"] == null || body["password"] == null) {
+      return Response.badRequest(body: "add email and password please");
+    }
+
+    final auth = SupabaseEnv().supabase.auth;
+
+    final userLogin = await auth.signInWithPassword(
+      email: body["email"],
+      password: body["password"],
     );
-  } on AuthException catch (error) {
-    return CustomResponse()
-        .errorResponse(msg: error.message, statusCode: error.statusCode);
-  } on Exception catch (error) {
-    return CustomResponse().errorResponse(msg: '$error', statusCode: '400');
+
+    return CustomResponse().successResponse(
+      msg: "success",
+      data: {
+        "token": userLogin.session?.accessToken.toString(),
+        "refresh Token": userLogin.session?.refreshToken.toString(),
+      },
+    );
+  } catch (error) {
+    return Response.badRequest(body: "Sorry, try again later");
   }
 }

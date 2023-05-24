@@ -1,21 +1,24 @@
 // ignore_for_file: file_names
 
+import 'dart:convert';
+
 import 'package:shelf/shelf.dart';
 import 'package:supabase/supabase.dart';
 
 import '../../ResponseMsg/CustomResponse.dart';
+import '../../Services/Supabase/SupabaseEnv.dart';
 
-verifyEmailResponse(Request _) async {
-  try {
-    return CustomResponse().successResponse(
-      msg: "",
-      statusCode: 201,
-      data: [],
-    );
-  } on AuthException catch (error) {
-    return CustomResponse()
-        .errorResponse(msg: error.message, statusCode: error.statusCode);
-  } on Exception catch (error) {
-    return CustomResponse().errorResponse(msg: '$error', statusCode: '400');
+verifyEmailResponse(Request req) async {
+  try {  
+    final body = json.decode(await req.readAsString());
+     await SupabaseEnv().supabase.auth.verifyOTP(
+           token: body['otp'],
+           type: OtpType.signup,
+           email: body['email'],
+         );
+
+     return CustomResponse().successResponse(msg: "email is confirm", statusCode: 200);
+   } catch (error) {
+     return CustomResponse().errorResponse(msg: "email not confirm", statusCode: '400');
   }
 }

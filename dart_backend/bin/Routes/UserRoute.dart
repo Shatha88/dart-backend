@@ -13,11 +13,16 @@ import '../Responses/User/displayUserContact.dart';
 class UserRoute {
   Handler get handler {
     final router = Router()
-      ..post('/add_contact', addContactResponse) // Add contact
-      ..get("/view_contact/<id>", displayContactResponse) // display contact
-      ..delete('/delete_mycontact/<id>', deleteContactResponse) //delete contact
-      ..get("/display_user/<id>", displayUserContact) // display user => contact
-      ..get('/view_allcontact', displayAllContact);
+      // Add contact
+      ..post('/add_contact', addContactResponse)
+      //delete contact
+      ..delete('/delete_mycontact/<id>', deleteContactResponse)
+      // display contact
+      ..get("/view_contact/<id>", displayContactResponse)
+      // display all contact
+      ..get('/view_allcontact', displayAllContact)
+      // display user => contact
+      ..get("/display_user/<id>", displayUserContact);
 
     final pipline =
         Pipeline().addMiddleware(checkTokenMiddleware()).addHandler(router);
